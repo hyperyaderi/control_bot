@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.INFO)
 
 bot = Bot(token=os.environ.get('TG_TOKEN'))
 dp = Dispatcher(bot)
-whitelist = [1999113390, 1618915689, 834381991]
+whitelist = [1888296065, 1999113390, 1618915689, 834381991]
 
 @dp.message_handler(filters.Text(equals=['/stopices']))
 async def stopices(message: types.Message):
