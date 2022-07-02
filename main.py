@@ -46,7 +46,7 @@ async def restartices(message: types.Message):
         await message.answer('Ices перезапущен!')
         os.system('/home/icecast/restartices')
 
-@dp.message_handler(filter.Command('nowplaying'))
+@dp.message_handler(filters.Command('nowplaying'))
 async def nowplaying(message: types.Message):
     if message.from_user.id not in whitelist:
         await message.reply('Пошёл нахуй!')
