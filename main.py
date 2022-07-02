@@ -19,16 +19,16 @@ async def stopices(message: types.Message):
     if message.from_user.id not in whitelist:
         await message.reply('Пошёл нахуй!')
     else:
-        os.system('/home/icecast/stopices')
         await message.reply('Ices стопнут, можете врываться с радиобосса')
+        os.system('/home/icecast/stopices')
 
 @dp.message_handler(filters.Command('/startices'))
 async def startices(message: types.Message):
     if message.from_user.id not in whitelist:
         await message.reply('Пошёл нахуй!')
     else:
-        os.system('/home/icecast/startices')
         await message.reply('Ices запущен, ведется поток плейлиста')
+        os.system('/home/icecast/startices')
 
 if __name__ == '__main__':
     executor.start_polling(dp)
