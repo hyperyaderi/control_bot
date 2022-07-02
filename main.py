@@ -1,7 +1,5 @@
 import os
 import logging
-import aiogram
-
 from dotenv import load_dotenv
 from aiogram.utils import executor
 from aiogram import Bot, types, filters
@@ -14,7 +12,7 @@ bot = Bot(token=os.environ.get('TG_TOKEN'))
 dp = Dispatcher(bot)
 whitelist = [1888296065, 1999113390, 1618915689, 834381991]
 
-@dp.message_handler(filters.Command('/stopices'))
+@dp.message_handler(filters.Text(equals=['/stopices']))
 async def stopices(message: types.Message):
     if message.from_user.id not in whitelist:
         await message.reply('Пошёл нахуй!')
@@ -22,7 +20,7 @@ async def stopices(message: types.Message):
         await message.reply('Ices стопнут, можете врываться с радиобосса')
         os.system('/home/icecast/stopices')
 
-@dp.message_handler(filters.Command('/startices'))
+@dp.message_handler(filters.Text(equals=['/startices']))
 async def startices(message: types.Message):
     if message.from_user.id not in whitelist:
         await message.reply('Пошёл нахуй!')
