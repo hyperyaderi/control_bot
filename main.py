@@ -55,7 +55,7 @@ async def nowplaying(message: types.Message):
         resp = requests.get(url).text
         data = json.loads(resp)
         # nowplaying = data[0]['title']
-        await message.answer(data[0])
+        await message.answer(data['/radio']['title'])
 
 if __name__ == '__main__':
     executor.start_polling(dp)
