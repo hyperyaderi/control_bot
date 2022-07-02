@@ -54,8 +54,8 @@ async def nowplaying(message: types.Message):
         url = 'https://radio.hyperyaderi.ru/info.xsl'
         resp = requests.get(url).text
         data = json.loads(resp)
-        # nowplaying = data[0]['title']
-        await message.answer(data['/radio']['title'])
+        nowplaying = data['/radio']['title']
+        await message.answer(f'Сейчас играет: *{nowplaying}*', parse_mode='markdown')
 
 if __name__ == '__main__':
     executor.start_polling(dp)
