@@ -1,4 +1,5 @@
 import os
+import json
 import logging
 import requests
 from dotenv import load_dotenv
@@ -43,7 +44,7 @@ async def restartices(message: types.Message):
         await message.reply('Пошёл нахуй!')
     else:
         await message.answer('Ices перезапущен!')
-        os.system('/home/icecast/restartices')        
+        os.system('/home/icecast/restartices')
 
 @dp.message_handler(filters.Text(equals=['/nowplaying']))
 async def nowplaying(message: types.Message):
@@ -51,8 +52,8 @@ async def nowplaying(message: types.Message):
         await message.reply('Пошёл нахуй!')
     else:
         url = 'https://radio.hyperyaderi.ru/info.xsl'
-        resp = requests.get(url=url)
-        data = resp.json()
+        resp = requests.get(url).text
+        data = json.loads(resp)
         nowplaying = data[0]['title']
         await message.answer(nowplaying)
 
