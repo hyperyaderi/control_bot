@@ -48,14 +48,11 @@ async def restartices(message: types.Message):
 
 @dp.message_handler(filters.Command('nowplaying'))
 async def nowplaying(message: types.Message):
-    if message.from_user.id not in whitelist:
-        await message.reply('Пошёл нахуй!')
-    else:
-        url = 'https://radio.hyperyaderi.ru/info.xsl'
-        resp = requests.get(url).text
-        data = json.loads(resp)
-        nowplaying = data['/radio']['title']
-        await message.answer(f'Сейчас играет: *{nowplaying}*', parse_mode='markdown')
+    url = 'https://radio.hyperyaderi.ru/info.xsl'
+    resp = requests.get(url).text
+    data = json.loads(resp)
+    nowplaying = data['/radio']['title']
+    await message.answer(f'Сейчас играет: *{nowplaying}*', parse_mode='markdown')
 
 @dp.message_handler(filters.Command('listeners'))
 async def listeners(message: types.Message):
