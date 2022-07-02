@@ -27,3 +27,6 @@ async def startices(message: types.Message):
     else:
         os.system('/home/icecast/startices')
         await message.reply('Ices запущен, ведется поток плейлиста')
+
+if __name__ == '__main__':
+    executor.start_polling(dp)
