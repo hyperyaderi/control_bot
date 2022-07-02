@@ -28,5 +28,21 @@ async def startices(message: types.Message):
         await message.reply('Ices запущен, ведется поток плейлиста')
         os.system('/home/icecast/startices')
 
+@dp.message_handler(filters.Text(equals=['/updateplaylist']))
+async def updateplaylist(message: types.Message):
+    if message.from_user.id not in whitelist:
+        await message.reply('Пошёл нахуй!')
+    else:
+        await message.reply('Плейлист обновлён! Теперь нужно перезапустить Ices')
+        os.system('/home/icecast/updateplaylist')
+
+@dp.message_handler(filters.Text(equals=['/restartices']))
+async def restartices(message: types.Message):
+    if message.from_user.id not in whitelist:
+        await message.reply('Пошёл нахуй!')
+    else:
+        await message.reply('Ices перезапущен!')
+        os.system('/home/icecast/restartices')        
+
 if __name__ == '__main__':
     executor.start_polling(dp)
