@@ -1,0 +1,9 @@
+__pycache__
+.cache
+tracks
+.venv
+.env
+.cache_spoty_token.json
+restart
+stop
+start
