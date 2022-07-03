@@ -56,14 +56,11 @@ async def nowplaying(message: types.Message):
 
 @dp.message_handler(filters.Command('listeners'))
 async def listeners(message: types.Message):
-    if message.from_user.id not in whitelist:
-        await message.reply('Пошёл нахуй!')
-    else:
-        url = 'https://radio.hyperyaderi.ru/info.xsl'
-        resp = requests.get(url).text
-        data = json.loads(resp)
-        listeners = data['/radio']['listeners']
-        await message.answer(f'Сейчас радио слушают *{listeners}* чел.', parse_mode='markdown')
+    url = 'https://radio.hyperyaderi.ru/info.xsl'
+    resp = requests.get(url).text
+    data = json.loads(resp)
+    listeners = data['/radio']['listeners']
+    await message.answer(f'Сейчас радио слушают *{listeners}* чел.', parse_mode='markdown')
 
 if __name__ == '__main__':
     executor.start_polling(dp)
