@@ -51,7 +51,7 @@ async def nowplaying(message: types.Message):
     url = 'https://radio.hyperyaderi.ru/status-json.xsl'
     resp = requests.get(url).text
     data = json.loads(resp)
-    nowplaying = data['source']['title']
+    nowplaying = data['icestats']['source']['title']
     await message.answer(f'Сейчас играет: *{nowplaying}*', parse_mode='markdown')
 
 @dp.message_handler(filters.Command('listeners'))
@@ -59,8 +59,8 @@ async def listeners(message: types.Message):
     url = 'https://radio.hyperyaderi.ru/status-json.xsl'
     resp = requests.get(url).text
     data = json.loads(resp)
-    listeners = data['source']['listeners']
-    listener_peak = data['source']['listener_peak']
+    listeners = data['icestats']['source']['listeners']
+    listener_peak = data['icestats']['source']['listener_peak']
     await message.answer(f'Сейчас радио слушают *{listeners}* чел.\nПик: *{listener_peak}* чел.', parse_mode='markdown')
 
 if __name__ == '__main__':
