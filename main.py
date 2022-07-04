@@ -1,3 +1,4 @@
+from email import message
 import os
 import json
 import shutil
@@ -15,14 +16,15 @@ logging.basicConfig(level=logging.INFO)
 
 bot = Bot(token=os.environ.get('TG_TOKEN'))
 dp = Dispatcher(bot)
-whitelist = [1888296065, 1999113390, 1618915689, 834381991, 1279811417, 837236788]
 musicfolder = '/home/icecast/music'
 chatid = '-1001646996853'
+whitelist = [1888296065, 1999113390, 1618915689, 834381991, 1279811417, 837236788]
+admins = [1999113390, 1618915689]
 
-def inline_removefile_keyboard(filename):
+def inline_removefile_keyboard(filename: str, userid: int):
 	keyboard = types.InlineKeyboardMarkup(one_time_keyboard=True)
-	acceptbtn = types.InlineKeyboardButton('✅ Подтвердить', callback_data=f'acceptbtn|||{filename}')
-	declinebtn = types.InlineKeyboardButton('❌ Отменить', callback_data=f'declinebtn|||{filename}')
+	acceptbtn = types.InlineKeyboardButton('✅ Подтвердить', callback_data=f'acceptbtn|||{filename}|||{userid}')
+	declinebtn = types.InlineKeyboardButton('❌ Отменить', callback_data=f'declinebtn|||{filename}|||{userid}')
 	keyboard.add(acceptbtn)
 	keyboard.add(declinebtn)
 	return keyboard
@@ -97,26 +99,53 @@ async def cleartags(message: types.Message):
 
 @dp.message_handler(filters.Command('deletetrack'))
 async def deletetrack(message: types.Message):
-    if message.from_user.id not in whitelist:
+    if message.from_user.id not in admins:
         await message.reply('Пошёл нахуй!')
     else:
         url = 'https://radio.hyperyaderi.ru/status-json.xsl'
         resp = requests.get(url).text
         data = json.loads(resp)
+        userid = message.from_user.id
         nowplaying = data['icestats']['source']['title']
-        await message.answer(f'Вы действительно хотите удалить трек *{nowplaying}*?', reply_markup=inline_removefile_keyboard(nowplaying), parse_mode="markdown")
+        inline_removefile_keyboard(nowplaying, userid)
+        # await message.answer(f'{str(nowplaying)}, {int(userid)}')
+        await message.answer(f'Вы действительно хотите удалить трек *{nowplaying}*?', reply_markup=inline_removefile_keyboard(str(nowplaying), int(userid)), parse_mode="markdown")
 
 @dp.callback_query_handler(lambda c: c.data.startswith('accept'))
 async def process_accept_button(callback_query: types.CallbackQuery):
     separator = '|||'
     data = callback_query.data.split(separator)
     zalupa = data[1]
-    filename = f'{musicfolder}/{zalupa}.mp3'
-    os.remove(filename)
-    await bot.send_message(chatid, f'✅ Файл <code>{filename}</code>\n<b>был удалён</b>', parse_mode="html")
+    userid = int(data[2])
+    username = callback_query.from_user.username
+    if "_" in username:
+        username = username.replace('_', '\_')
+    if callback_query.from_user.id == userid:
+        filename = f'{musicfolder}/{zalupa}.mp3'
+        try:
+            os.remove(filename)
+        except FileNotFoundError:
+            await bot.send_message(chatid, '🚫 Файл не найден')
+        await bot.send_message(chatid, f'✅ Файл <code>{filename}</code>\n<b>был удалён</b>', parse_mode="html")
+        await callback_query.message.delete_reply_markup()
+        await callback_query.answer()
+    elif int(callback_query.from_user.id) != userid:
+        await bot.send_message(chatid, f'@{username}, 🚫 Эта кнопка не для тебя', parse_mode="markdown")
+        return    
+
+@dp.callback_query_handler(lambda c: c.data.startswith('decline'))
+async def process_decline_button(callback_query: types.CallbackQuery):
+    separator = '|||'
+    data = callback_query.data.split(separator)
+    userid = int(data[2])
+    username = callback_query.from_user.username
+    if "_" in username:
+        username = username.replace('_', '\_')
+    if int(callback_query.from_user.id) != userid:
+        await bot.send_message(chatid, f'@{username}, 🚫 Эта кнопка не для тебя', parse_mode="markdown")
+        return
     await callback_query.message.delete_reply_markup()
     await callback_query.answer()
-
 
 if __name__ == '__main__':
     executor.start_polling(dp)
