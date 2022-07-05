@@ -18,13 +18,14 @@ bot = Bot(token=os.environ.get('TG_TOKEN'))
 dp = Dispatcher(bot)
 musicfolder = '/home/icecast/music'
 chatid = '-1001646996853'
+logsid = '-629518744'
 whitelist = [1888296065, 1999113390, 1618915689, 834381991, 1279811417, 837236788]
-admins = [1999113390, 1618915689]
+admins = [1888296065, 1999113390, 1618915689]
 
 def inline_removefile_keyboard(filename: str, userid: int):
 	keyboard = types.InlineKeyboardMarkup(one_time_keyboard=True)
-	acceptbtn = types.InlineKeyboardButton('✅ Подтвердить', callback_data=f'acceptbtn|||{filename}|||{userid}')
-	declinebtn = types.InlineKeyboardButton('❌ Отменить', callback_data=f'declinebtn|||{filename}|||{userid}')
+	acceptbtn = types.InlineKeyboardButton('✅ Подтвердить', callback_data=f'acc||{filename}||{userid}')
+	declinebtn = types.InlineKeyboardButton('❌ Отменить', callback_data=f'dec||{filename}||{userid}')
 	keyboard.add(acceptbtn)
 	keyboard.add(declinebtn)
 	return keyboard
@@ -35,32 +36,48 @@ async def stopices(message: types.Message):
     if message.from_user.id not in whitelist:
         await message.reply('Пошёл нахуй!')
     else:
+        username = message.from_user.username
+        if "_" in username:
+            username = username.replace('_', '\_')
         await message.answer('Ices стопнут, можете врываться с радиобосса')
         os.system('/home/icecast/stopices')
+        await bot.send_message(logsid, f'#stopices\nuser: @{username}', parse_mode='markdown')
 
 @dp.message_handler(filters.Command('startices'))
 async def startices(message: types.Message):
     if message.from_user.id not in whitelist:
         await message.reply('Пошёл нахуй!')
     else:
+        username = message.from_user.username
+        if "_" in username:
+            username = username.replace('_', '\_')
         await message.answer('Ices запущен, ведется поток плейлиста')
         os.system('/home/icecast/startices')
+        await bot.send_message(logsid, f'#startices\nuser: @{username}', parse_mode='markdown')
 
 @dp.message_handler(filters.Command('updateplaylist'))
 async def updateplaylist(message: types.Message):
     if message.from_user.id not in whitelist:
         await message.reply('Пошёл нахуй!')
     else:
+        username = message.from_user.username
+        if "_" in username:
+            username = username.replace('_', '\_')
         await message.answer('Плейлист обновлён! Теперь нужно перезапустить Ices')
         os.system('/home/icecast/updateplaylist')
+        await bot.send_message(logsid, f'#updateplaylist\nuser: @{username}', parse_mode='markdown')
 
 @dp.message_handler(filters.Command('restartices'))
 async def restartices(message: types.Message):
     if message.from_user.id not in whitelist:
         await message.reply('Пошёл нахуй!')
     else:
+        username = message.from_user.username
+        if "_" in username:
+            username = username.replace('_', '\_')
         await message.answer('Ices перезапущен!')
         os.system('/home/icecast/restartices')
+        await bot.send_message(logsid, f'#restartices\nuser: @{username}', parse_mode='markdown')
 
 @dp.message_handler(filters.Command('nowplaying'))
 async def nowplaying(message: types.Message):
@@ -84,6 +101,9 @@ async def cleartags(message: types.Message):
     if message.from_user.id not in whitelist:
         await message.reply('Пошёл нахуй!')
     else:
+        username = message.from_user.username
+        if "_" in username:
+            username = username.replace('_', '\_')
         await message.reply('Начинаю процесс удаления тегов!')
         for root, dirs, files in os.walk(musicfolder):
             for file in files:
@@ -96,6 +116,7 @@ async def cleartags(message: types.Message):
                     except:
                         print('no ID3 tag')
         await message.reply('Теги удалены!')
+        await bot.send_message(logsid, f'#cleartags\nuser: @{username}', parse_mode='markdown')
 
 @dp.message_handler(filters.Command('deletetrack'))
 async def deletetrack(message: types.Message):
@@ -108,12 +129,11 @@ async def deletetrack(message: types.Message):
         userid = message.from_user.id
         nowplaying = data['icestats']['source']['title']
         inline_removefile_keyboard(nowplaying, userid)
-        # await message.answer(f'{str(nowplaying)}, {int(userid)}')
         await message.answer(f'Вы действительно хотите удалить трек *{nowplaying}*?', reply_markup=inline_removefile_keyboard(str(nowplaying), int(userid)), parse_mode="markdown")
 
-@dp.callback_query_handler(lambda c: c.data.startswith('accept'))
+@dp.callback_query_handler(lambda c: c.data.startswith('ac'))
 async def process_accept_button(callback_query: types.CallbackQuery):
-    separator = '|||'
+    separator = '||'
     data = callback_query.data.split(separator)
     zalupa = data[1]
     userid = int(data[2])
@@ -122,20 +142,24 @@ async def process_accept_button(callback_query: types.CallbackQuery):
         username = username.replace('_', '\_')
     if callback_query.from_user.id == userid:
         filename = f'{musicfolder}/{zalupa}.mp3'
+        caption = f'#deletetrack\nuser: @{username}\n{filename}'
+        with open(filename, "rb") as file:
+            await bot.send_audio(logsid, file, caption=caption, parse_mode='markdown')
+            file.close()
+        await callback_query.message.delete_reply_markup()
+        await callback_query.answer()
         try:
             os.remove(filename)
         except FileNotFoundError:
             await bot.send_message(chatid, '🚫 Файл не найден')
         await bot.send_message(chatid, f'✅ Файл <code>{filename}</code>\n<b>был удалён</b>', parse_mode="html")
-        await callback_query.message.delete_reply_markup()
-        await callback_query.answer()
     elif int(callback_query.from_user.id) != userid:
         await bot.send_message(chatid, f'@{username}, 🚫 Эта кнопка не для тебя', parse_mode="markdown")
         return    
 
-@dp.callback_query_handler(lambda c: c.data.startswith('decline'))
+@dp.callback_query_handler(lambda c: c.data.startswith('de'))
 async def process_decline_button(callback_query: types.CallbackQuery):
-    separator = '|||'
+    separator = '||'
     data = callback_query.data.split(separator)
     userid = int(data[2])
     username = callback_query.from_user.username
