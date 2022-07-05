@@ -170,7 +170,7 @@ async def inline_nowplaying(inline_query: InlineQuery):
                                         id=result_id,
                                         title=f'Количество слушателей',
                                         input_message_content=InputTextMessageContent(
-                                            message_text=f'Радио слушают *{listeners}* чел.',
+                                            message_text=f'Радио слушают *{listeners}* чел.\nПик: *{listener_peak}* чел.',
                                             parse_mode='markdown'
                                         )
                                     )]
