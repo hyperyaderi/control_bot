@@ -153,38 +153,38 @@ async def inline_nowplaying(inline_query: InlineQuery):
             input_content = InputTextMessageContent(text)
             result_id: str = hashlib.md5(text.encode()).hexdigest()
             nowplaying = data['icestats']['source']['title']
-            item = InlineQueryResultArticle(
+            item = [InlineQueryResultArticle(
                                         id=result_id,
                                         title=f'Отправить трек играющий сейчас на радио',
                                         input_message_content=InputTextMessageContent(
                                             message_text=f'Сейчас играет: *{nowplaying}*',
                                             parse_mode='markdown'
                                         )
-                                    )
+                                    )]
         case 'ls':
             input_content = InputTextMessageContent(text)
             result_id: str = hashlib.md5(text.encode()).hexdigest()
             listeners = data['icestats']['source']['listeners']
             listener_peak = data['icestats']['source']['listener_peak']
-            item = InlineQueryResultArticle(
+            item = [InlineQueryResultArticle(
                                         id=result_id,
                                         title=f'Количество слушателей',
                                         input_message_content=InputTextMessageContent(
                                             message_text=f'Радио слушают *{listeners}* чел.',
                                             parse_mode='markdown'
                                         )
-                                    )
+                                    )]
         case _:
             input_content = InputTextMessageContent(text)
             result_id: str = hashlib.md5(text.encode()).hexdigest()
-            item = InlineQueryResultArticle(
+            item = [InlineQueryResultArticle(
                                         id=result_id,
                                         title=f'Неизвестная команда\nНажмите для того чтобы увидеть список команд',
                                         input_message_content=InputTextMessageContent(
                                             message_text=f'Список команд:\n*np* - текущий трек на радио\n*ls* - узнать кол-во слушателей',
                                             parse_mode='markdown'
                                         )
-                                    )
+                                    )]
     await bot.answer_inline_query(inline_query.id, item, cache_time=1)
 
 if __name__ == '__main__':
