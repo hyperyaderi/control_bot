@@ -10,3 +10,4 @@ pip install -r requirements.txt
 ```bash
 python3 main.py
 ```
+[GPL-3.0](./LICENSE) © [HyperYaderi](https://hyperyaderi.ru)
